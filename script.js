@@ -1,17 +1,46 @@
-// script.js — StudyInsight
+// script.js — StudyInsight (fix definitivo para limpeza de input após refresh/back-forward cache)
 
-// ===== Fix: limpar busca e resultados ao recarregar a página =====
-window.addEventListener("load", () => {
+// Helper: limpa o campo de busca e área de resultados, e garante estado consistente
+function clearSearchState() {
   const q = document.getElementById("query");
   const r = document.getElementById("results");
   const d = document.getElementById("details");
 
-  if (q) q.value = "";
+  if (q) {
+    // limpa o valor e remove qualquer value atribuído no HTML
+    q.value = "";
+    q.removeAttribute('value');
+    // opcional: instruir o navegador a não autocompletar
+    try { q.setAttribute('autocomplete', 'off'); } catch(e){ /* ignore */ }
+  }
   if (r) r.innerHTML = "";
   if (d) d.classList.add("hidden");
+
+  // dispara um evento input para garantir que listeners reajam e atualizem a UI
+  if (q) {
+    const ev = new Event('input', { bubbles: true, cancelable: true });
+    q.dispatchEvent(ev);
+  }
+}
+
+// 1) pageshow: cobre casos de BFCache / restauração de página (back/forward)
+window.addEventListener('pageshow', (evt) => {
+  // quando evt.persisted === true o navegador restaurou a página do cache
+  // mas fazemos a limpeza sempre para garantir consistência
+  clearSearchState();
+
+  // Em alguns navegadores a restauração ocorre ligeiramente depois — garantir com timeout
+  setTimeout(() => clearSearchState(), 50);
 });
 
-// ===== Original =====
+// 2) load: limpeza imediata em carregamento normal
+window.addEventListener('load', () => {
+  clearSearchState();
+  // garantia adicional caso o navegador restaure depois
+  setTimeout(() => clearSearchState(), 50);
+});
+
+// ===== Original logic preserved =====
 const btn = document.getElementById('btn-search');
 const queryEl = document.getElementById('query');
 const results = document.getElementById('results');
@@ -21,8 +50,8 @@ const closeBtn = document.getElementById('close-details');
 
 const API_ENDPOINT = '/api/search'; // se rodar apenas front, o fetch cairá em erro — fallback tratado
 
-btn.addEventListener('click', () => runSearch(queryEl.value));
-queryEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') runSearch(queryEl.value) });
+btn && btn.addEventListener('click', () => runSearch(queryEl.value));
+queryEl && queryEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') runSearch(queryEl.value) });
 closeBtn && closeBtn.addEventListener('click', () => details.classList.add('hidden'));
 
 async function runSearch(q) {
@@ -62,12 +91,11 @@ async function runSearch(q) {
 function localSearch(k, q) {
   const ql = q.toLowerCase();
   const scored = k.map(item => {
-    const text = (item.title + ' ' + item.tags.join(' ') + ' ' + item.content).toLowerCase();
-    // score simples: presença & index
+    const text = (item.title + ' ' + (item.tags||[]).join(' ') + ' ' + item.content).toLowerCase();
     const score = (text.includes(ql) ? 2 : 0) + (item.title.toLowerCase().startsWith(ql) ? 1 : 0);
     return {...item, score};
   }).filter(i=>i.score>0).sort((a,b)=>b.score - a.score);
-  return scored.length ? scored : k.slice(0,6); // se nada bateu, mostra primeiros
+  return scored.length ? scored : k.slice(0,6);
 }
 
 function renderResults(items) {
