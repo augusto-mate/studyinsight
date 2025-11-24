@@ -1,4 +1,17 @@
 // script.js — StudyInsight
+
+// ===== Fix: limpar busca e resultados ao recarregar a página =====
+window.addEventListener("load", () => {
+  const q = document.getElementById("query");
+  const r = document.getElementById("results");
+  const d = document.getElementById("details");
+
+  if (q) q.value = "";
+  if (r) r.innerHTML = "";
+  if (d) d.classList.add("hidden");
+});
+
+// ===== Original =====
 const btn = document.getElementById('btn-search');
 const queryEl = document.getElementById('query');
 const results = document.getElementById('results');
@@ -90,5 +103,7 @@ function showDetails(it) {
 }
 
 function escapeHtml(s='') {
-  return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); });
+  return String(s).replace(/[&<>"']/g, function(m){ 
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); 
+  });
 }
