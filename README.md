@@ -2,7 +2,7 @@
 **Encontre conteúdos, exemplos e exercícios para aprender qualquer tema em segundos.**
 
 StudyInsight é uma aplicação leve construída durante a **Imersão Dev com Google Gemini (Alura)**.  
-**Objetivo:** demonstrar HTML, CSS, JavaScript assíncrono, manipulação de DOM, base de conhecimento em JSON e ampliação com Node.js e IA (opcional). Ideal para apresentação no GitHub + publicação no LinkedIn.
+**Objetivo:** demonstrar HTML, CSS, JavaScript assíncrono, manipulação de DOM, base de conhecimento em JSON e ampliação com Node.js e IA.
 
 ---
 
@@ -13,18 +13,21 @@ StudyInsight é uma aplicação leve construída durante a **Imersão Dev com Go
 
 ---
 
-## Arquivos principais
+## Estrutura do Projeto
 
 ```bash
 /
 ├─ index.html
-├─ style.css
-├─ script.js
 ├─ knowledge.json
+├─ script.js
+├─ style.css
 ├─ api/
-│ ├─ server.js
-│ └─ gemini_stub.js
-├─ package.json
+│ ├─ gemini_stub.js
+│ ├─ package.json
+│ └─ server.js
+├─ assets/
+│ └─ cover.svg
+├─ LICENSE
 └─ README.md
 ```
 
